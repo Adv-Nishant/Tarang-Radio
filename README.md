@@ -1,4 +1,4 @@
-# Radio-wallah-
+# Tarang (तरंग) Radio 
 
 Mobile-friendly single-page web app for streaming live Indian radio stations.
 
