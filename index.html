@@ -4,8 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#070b16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="तरंग Radio">
 <title>तरंग · Live Indian Radio</title>
 <meta name="description" content="Stream All India Radio, regional, and language radio stations live and free — a single page you can save and open anytime.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./assets/icons/icon-16.png">
+<link rel="shortcut icon" href="./favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&family=Noto+Serif+Devanagari:wght@600&display=swap" rel="stylesheet">
@@ -745,6 +754,9 @@ body.np-open { overflow: hidden; }
   <header class="app-header">
     <div class="logo"><span class="logo-mark">Live&nbsp;Indian&nbsp;Radio</span><span class="logo-sub"></span></div>
     <div class="header-actions">
+      <button class="icon-btn" id="install-app" type="button" hidden aria-label="Install app">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><polyline points="7 10 12 15 17 10"/><rect x="4" y="17" width="16" height="4" rx="1.5"/></svg></span>
+      </button>
       <button class="icon-btn" id="layout-toggle" type="button" aria-label="Toggle grid or list view">
         <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></span>
       </button>
@@ -1580,6 +1592,7 @@ const UI = (() => {
 
   function cacheRefs() {
     el.offlineBanner = q('offline-banner');
+    el.installApp = q('install-app');
     el.themeToggle = q('theme-toggle');
     el.layoutToggle = q('layout-toggle');
     el.searchInput = q('search-input');
@@ -1883,7 +1896,51 @@ const DataLoader = (() => {
 })();
 
 /* ==========================================================================
-   12. APP — wires everything together
+   12. PWA — install prompt and service worker lifecycle
+   ========================================================================== */
+const PWA = (() => {
+  let deferredPrompt = null;
+
+  async function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+      await navigator.serviceWorker.register('./sw.js');
+    } catch (_) {}
+  }
+
+  function bindInstallButton(btn) {
+    if (!btn) return;
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    if (isStandalone) btn.hidden = true;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      btn.hidden = false;
+    });
+
+    btn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome !== 'accepted') UI.showToast('Install cancelled');
+      deferredPrompt = null;
+      btn.hidden = true;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      btn.hidden = true;
+      UI.showToast('App installed');
+    });
+  }
+
+  return { registerServiceWorker, bindInstallButton };
+})();
+
+/* ==========================================================================
+   13. APP — wires everything together
    ========================================================================== */
 const App = (() => {
   function applyTheme(theme) {
@@ -2036,11 +2093,13 @@ const App = (() => {
     applyTheme(Storage.getTheme());
     UI.cacheRefs();
     UI.el.layoutToggle.innerHTML = Store.get().layout === 'grid' ? Icons.list : Icons.grid;
+    PWA.bindInstallButton(UI.el.installApp);
     bindEvents();
     UI.showView('home');
     UI.renderHome();
     UI.renderFavorites();
     await DataLoader.boot();
+    PWA.registerServiceWorker();
 
     // Best-effort live "currently trending" signal to refine the popularity-based
     // rail already showing from the cached dataset — not required for correctness.

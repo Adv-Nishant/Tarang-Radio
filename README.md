@@ -10,6 +10,7 @@ Mobile-friendly single-page web app for streaming live Indian radio stations.
 - Canvas-based live visualizer during playback.
 - Search and language filters for quick station discovery.
 - Responsive layout optimized for phone browsers.
+- Installable PWA (Chrome "Add to Home screen"/Install support) with app icons.
 
 ## Development
 
