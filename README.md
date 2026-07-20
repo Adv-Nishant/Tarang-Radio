@@ -11,16 +11,4 @@ Mobile-friendly single-page web app for streaming live Indian radio stations.
 - Search and language filters for quick station discovery.
 - Responsive layout optimized for phone browsers.
 - Installable PWA (Chrome "Add to Home screen"/Install support) with app icons.
-
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-## Build
-
-```bash
-npm run build
-```
+- Go to https://adv-nishant.github.io/Radio-wallah-/. and click download icon on uper right corner then install web app to enjoy it native radio app right from you home screen..
