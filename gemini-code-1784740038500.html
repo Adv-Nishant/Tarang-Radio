@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <title>Tarang FM — Live Indian Radio</title>
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --bg-glass: rgba(30, 41, 59, 0.85);
+      --accent: #f97316;
+      --accent-glow: rgba(249, 115, 22, 0.35);
+      --accent-gold: #eab308;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --danger: #ef4444;
+      --success: #10b981;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --bg-glass: rgba(255, 255, 255, 0.88);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding-bottom: 140px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+    .hidden { display: none !important; }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--bg-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-gold));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:active { transform: scale(0.92); }
+
+    .offline-badge {
+      font-size: 0.75rem;
+      background: var(--danger);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+
+    /* Search */
+    .search-container {
+      padding: 12px 16px 4px 16px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-wrapper svg {
+      position: absolute;
+      left: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px 12px 42px;
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Categories Horizontal Scroll */
+    .categories-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .categories-bar::-webkit-scrollbar { display: none; }
+
+    .chip {
+      padding: 8px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    /* Filters Row */
+    .filters-row {
+      display: flex;
+      gap: 10px;
+      padding: 0 16px 12px 16px;
+    }
+
+    .select-dropdown {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Views Layout */
+    .view { display: none; padding: 0 16px; }
+    .view.active { display: block; }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 16px 0 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-primary);
+    }
+
+    /* Station Grid & List */
+    .stations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .stations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Station Card */
+    .station-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+    }
+
+    .station-card:active { transform: scale(0.97); }
+    .station-card.playing {
+      border-color: var(--accent);
+      background: rgba(249, 115, 22, 0.05);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .station-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: var(--bg-card-hover);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .fav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .fav-btn.active { color: var(--danger); }
+    .fav-btn:active { transform: scale(1.2); }
+
+    .station-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .station-meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 8px;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .tag-badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .tag-badge.bitrate {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+    }
+
+    .card-unavailable {
+      opacity: 0.5;
+    }
+    .card-unavailable::after {
+      content: "Unavailable";
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.6rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* Mini Player */
+    .mini-player {
+      position: fixed;
+      bottom: 64px;
+      left: 12px;
+      right: 12px;
+      z-index: 50;
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-lg);
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .mini-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .mini-thumb {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--bg-card-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .mini-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .mini-text {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .mini-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mini-status {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mini-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .play-btn-main {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px var(--accent-glow);
+    }
+
+    .timer-badge {
+      font-size: 0.65rem;
+      background: rgba(234, 179, 8, 0.2);
+      color: var(--accent-gold);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      z-index: 40;
+      background: var(--bg-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 25%;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    /* Fullscreen Now Playing Overlay */
+    .now-playing-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--bg-main);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 24px;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    .now-playing-screen.open {
+      transform: translateY(0);
+    }
+
+    .np-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .np-artwork-container {
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 1;
+      margin: 0 auto 24px auto;
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .np-artwork {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Equalizer Canvas */
+    .eq-canvas-container {
+      width: 100%;
+      height: 60px;
+      margin-bottom: 20px;
+    }
+
+    #eqCanvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .np-details {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .np-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .np-sub {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .np-tags {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 30px;
+      padding: 0 12px;
+    }
+
+    .volume-slider {
+      flex: 1;
+      accent-color: var(--accent);
+      height: 6px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .np-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      margin-bottom: 24px;
+    }
+
+    .np-btn-large {
+      width: 68px;
+      height: 68px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px var(--accent-glow);
+      cursor: pointer;
+    }
+
+    .np-secondary-controls {
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+    }
+
+    /* Sleep Timer Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 120;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      width: 100%;
+      max-width: 500px;
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: translateY(0);
+    }
+
+    .timer-option {
+      padding: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .timer-option:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.2 19.1 19.1M12 12h.01"/></svg>
+      </div>
+      <span>Tarang FM</span>
+    </div>
+    <div class="header-actions">
+      <div id="offlineBadge" class="offline-badge hidden">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.58 9M1.42 9a15.91 15.91 0 014.7-3.23M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+        Offline
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle Theme">
+        <svg class="sun-icon hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Search Input -->
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search by station, city, or language...">
+    </div>
+  </div>
+
+  <!-- Category Scroll Chips -->
+  <div class="categories-bar" id="categoryChips">
+    <div class="chip active" data-cat="all">All Stations</div>
+    <div class="chip" data-cat="news">News & Talk</div>
+    <div class="chip" data-cat="devotional">Devotional</div>
+    <div class="chip" data-cat="music">Music & FM</div>
+  </div>
+
+  <!-- Filters Row -->
+  <div class="filters-row">
+    <select id="languageSelect" class="select-dropdown">
+      <option value="all">All Languages</option>
+      <option value="hindi">Hindi</option>
+      <option value="tamil">Tamil</option>
+      <option value="telugu">Telugu</option>
+      <option value="bengali">Bengali</option>
+      <option value="marathi">Marathi</option>
+      <option value="punjabi">Punjabi</option>
+      <option value="malayalam">Malayalam</option>
+      <option value="kannada">Kannada</option>
+      <option value="gujarati">Gujarati</option>
+      <option value="english">English</option>
+    </select>
+    <select id="stateSelect" class="select-dropdown">
+      <option value="all">All States/Cities</option>
+      <option value="delhi">Delhi / NCR</option>
+      <option value="mumbai">Mumbai / MH</option>
+      <option value="chennai">Chennai / TN</option>
+      <option value="kolkata">Kolkata / WB</option>
+      <option value="bengaluru">Bengaluru / KA</option>
+      <option value="hyderabad">Hyderabad / TS</option>
+      <option value="punjab">Punjab</option>
+      <option value="kerala">Kerala</option>
+    </select>
+  </div>
+
+  <!-- MAIN VIEWS CONTAINER -->
+  <main id="mainContainer">
+    <!-- Home View -->
+    <section id="homeView" class="view active">
+      <div class="section-title">
+        <span>Trending Live Stations</span>
+        <button id="viewToggleBtn" class="icon-btn" style="width: 30px; height: 30px;" title="Toggle View">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </button>
+      </div>
+      <div id="stationsContainer" class="stations-grid">
+        <div class="station-card skeleton" style="height: 120px;"></div>
+        <div class="station-card skeleton" style="height: 120px;"></div>
+        <div class="station-card skeleton" style="height: 120px;"></div>
+        <div class="station-card skeleton" style="height: 120px;"></div>
+      </div>
+    </section>
+
+    <!-- Favorites View -->
+    <section id="favoritesView" class="view">
+      <div class="section-title">Your Favorite Stations</div>
+      <div id="favoritesContainer" class="stations-grid">
+        <p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 40px 0;">No favorite stations added yet.</p>
+      </div>
+    </section>
+
+    <!-- History View -->
+    <section id="historyView" class="view">
+      <div class="section-title">Recently Played</div>
+      <div id="historyContainer" class="stations-list">
+        <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No recently played stations.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mini Player -->
+  <div id="miniPlayer" class="mini-player hidden">
+    <div class="mini-info" id="miniPlayerClickArea">
+      <div class="mini-thumb" id="miniThumb"></div>
+      <div class="mini-text">
+        <div class="mini-title" id="miniTitle">Select a Station</div>
+        <div class="mini-status" id="miniStatus">
+          <span>Tap to play</span>
+        </div>
+      </div>
+    </div>
+    <div class="mini-controls">
+      <span id="sleepTimerBadge" class="timer-badge hidden">30m</span>
+      <button class="play-btn-main" id="miniPlayBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-target="homeView">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-target="favoritesView">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      <span>Favorites</span>
+    </button>
+    <button class="nav-item" data-target="historyView">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Recent</span>
+    </button>
+  </nav>
+
+  <!-- Fullscreen Now Playing Overlay -->
+  <div id="nowPlayingScreen" class="now-playing-screen">
+    <div class="np-header">
+      <button class="icon-btn" id="closeNpBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-secondary);">NOW PLAYING</span>
+      <button class="icon-btn" id="npFavBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      </button>
+    </div>
+
+    <div class="np-artwork-container" id="npArtworkContainer">
+      <img id="npArtworkImg" class="np-artwork" src="" alt="Station Artwork">
+    </div>
+
+    <!-- Canvas Waveform / Equalizer -->
+    <div class="eq-canvas-container">
+      <canvas id="eqCanvas"></canvas>
+    </div>
+
+    <div class="np-details">
+      <div id="npTitle" class="np-title">Station Name</div>
+      <div id="npSub" class="np-sub">City, Language</div>
+      <div id="npTags" class="np-tags">
+        <span class="tag-badge bitrate" id="npBitrate">128 kbps</span>
+        <span class="tag-badge" id="npFormat">MP3</span>
+      </div>
+    </div>
+
+    <!-- Volume Control -->
+    <div class="volume-container">
+      <button id="muteBtn" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+        <svg id="volIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+      </button>
+      <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="1">
+    </div>
+
+    <!-- Primary Playback Controls -->
+    <div class="np-controls">
+      <button class="icon-btn" id="prevBtn" title="Previous Station" style="width: 48px; height: 48px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      <button class="np-btn-large" id="npPlayBtn">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="icon-btn" id="nextBtn" title="Next Station" style="width: 48px; height: 48px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
+    </div>
+
+    <!-- Secondary Actions -->
+    <div class="np-secondary-controls">
+      <button class="icon-btn" id="sleepTimerBtn" title="Sleep Timer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </button>
+      <button class="icon-btn" id="shareBtn" title="Share Station">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sleep Timer Modal -->
+  <div id="sleepModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="section-title" style="margin-top:0;">Set Sleep Timer</div>
+      <div class="timer-option" data-minutes="15">15 Minutes</div>
+      <div class="timer-option" data-minutes="30">30 Minutes</div>
+      <div class="timer-option" data-minutes="45">45 Minutes</div>
+      <div class="timer-option" data-minutes="60">60 Minutes</div>
+      <div class="timer-option" data-minutes="0" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);">Turn Off Timer</div>
+    </div>
+  </div>
+
+  <!-- Audio Element Singleton -->
+  <audio id="audioPlayer" preload="none" crossorigin="anonymous"></audio>
+
+  <script>
+    /**
+     * UNIVERSAL SQUARE FALLBACK RADIO ARTWORK (Offline SVG Data URI)
+     */
+    const FALLBACK_IMAGE = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231e293b'/><circle cx='100' cy='105' r='55' fill='%23334155'/><circle cx='100' cy='105' r='35' fill='%230f172a'/><path d='M85 125V85l35 20z' fill='%23f97316'/><path d='M60 45h80M100 45v25' stroke='%23f97316' stroke-width='8' stroke-linecap='round'/></svg>";
+
+    /**
+     * BLACKLISTED CHANNELS (Removed due to unreliability/dead streams)
+     */
+    const BLACKLIST_NAMES = [
+      "vividh bharati", "vividh bharti", "vivid bharati", "air fm gold", "air fm rainbow", 
+      "radio city hindi", "air tamil", "air telugu", "punjabi hits radio", "bhakti sangeet dev",
+      "radio schizoid", "radio aashiqanaa", "air panjabi", "diverse fm", "magesh tamil",
+      "all india radio news", "air malayalam", "air bilaspur", "air pune", "free fm",
+      "ndtv", "tamil sun fm", "divyavani", "air delhi"
+    ];
+
+    function isBlacklisted(name) {
+      if (!name) return false;
+      const lower = name.toLowerCase().trim();
+      return BLACKLIST_NAMES.some(b => lower.includes(b));
+    }
+
+    /**
+     * RELIABLE FALLBACK STATIONS LIST
+     */
+    const FALLBACK_STATIONS = [
+      {
+        stationuuid: "fb-1",
+        name: "Radio City Love Hits",
+        url: "https://stream.zeno.fm/08868p00028uv",
+        homepage: "https://radiocity.in",
+        favicon: "",
+        tags: "fm,hindi,love,romantic",
+        countrycode: "IN",
+        state: "Mumbai",
+        language: "hindi",
+        bitrate: 128,
+        codec: "MP3"
+      },
+      {
+        stationuuid: "fb-2",
+        name: "Radio City Retro Express",
+        url: "https://stream.zeno.fm/3r22v31v384uv",
+        homepage: "https://radiocity.in",
+        favicon: "",
+        tags: "fm,retro,hindi,classics",
+        countrycode: "IN",
+        state: "Mumbai",
+        language: "hindi",
+        bitrate: 128,
+        codec: "MP3"
+      },
+      {
+        stationuuid: "fb-3",
+        name: "Mirchi Top 20 Hits",
+        url: "https://stream.zeno.fm/1r748y00028uv",
+        homepage: "",
+        favicon: "",
+        tags: "bollywood,top20,music",
+        countrycode: "IN",
+        state: "Delhi",
+        language: "hindi",
+        bitrate: 128,
+        codec: "MP3"
+      },
+      {
+        stationuuid: "fb-4",
+        name: "Desi Dance Express",
+        url: "https://stream.zeno.fm/k888y00028uv",
+        homepage: "",
+        favicon: "",
+        tags: "dance,remix,party",
+        countrycode: "IN",
+        state: "Mumbai",
+        language: "hindi",
+        bitrate: 128,
+        codec: "MP3"
+      },
+      {
+        stationuuid: "fb-5",
+        name: "Radio City Freedom",
+        url: "https://stream.zeno.fm/7x38914048uv",
+        homepage: "https://radiocity.in",
+        favicon: "",
+        tags: "indie,music,pop",
+        countrycode: "IN",
+        state: "Bengaluru",
+        language: "english",
+        bitrate: 128,
+        codec: "MP3"
+      },
+      {
+        stationuuid: "fb-6",
+        name: "Bhakti Dhwani Live",
+        url: "https://stream.zeno.fm/c888y00028uv",
+        homepage: "",
+        favicon: "",
+        tags: "devotional,bhajan,mantra",
+        countrycode: "IN",
+        state: "Varanasi",
+        language: "hindi",
+        bitrate: 128,
+        codec: "MP3"
+      }
+    ];
+
+    /**
+     * APP STATE
+     */
+    const state = {
+      stations: [],
+      filteredStations: [],
+      favorites: JSON.parse(localStorage.getItem('tarang_favs') || '[]'),
+      history: JSON.parse(localStorage.getItem('tarang_history') || '[]'),
+      currentStation: null,
+      isPlaying: false,
+      isBuffering: false,
+      isReconnecting: false,
+      retryCount: 0,
+      maxRetries: 4,
+      retryTimer: null,
+      activeCategory: 'all',
+      searchQuery: '',
+      selectedLanguage: 'all',
+      selectedState: 'all',
+      viewMode: 'grid',
+      theme: localStorage.getItem('tarang_theme') || 'dark',
+      sleepTimeout: null,
+      sleepEndTime: null,
+      sleepInterval: null
+    };
+
+    // DOM Elements
+    const audio = document.getElementById('audioPlayer');
+    const stationsContainer = document.getElementById('stationsContainer');
+    const favoritesContainer = document.getElementById('favoritesContainer');
+    const historyContainer = document.getElementById('historyContainer');
+    const searchInput = document.getElementById('searchInput');
+    const categoryChips = document.getElementById('categoryChips');
+    const languageSelect = document.getElementById('languageSelect');
+    const stateSelect = document.getElementById('stateSelect');
+    const miniPlayer = document.getElementById('miniPlayer');
+    const miniPlayBtn = document.getElementById('miniPlayBtn');
+    const miniTitle = document.getElementById('miniTitle');
+    const miniStatus = document.getElementById('miniStatus');
+    const miniThumb = document.getElementById('miniThumb');
+    const nowPlayingScreen = document.getElementById('nowPlayingScreen');
+    const npPlayBtn = document.getElementById('npPlayBtn');
+    const npTitle = document.getElementById('npTitle');
+    const npSub = document.getElementById('npSub');
+    const npArtworkImg = document.getElementById('npArtworkImg');
+    const npBitrate = document.getElementById('npBitrate');
+    const npFormat = document.getElementById('npFormat');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const muteBtn = document.getElementById('muteBtn');
+    const sleepModal = document.getElementById('sleepModal');
+    const sleepTimerBtn = document.getElementById('sleepTimerBtn');
+    const sleepTimerBadge = document.getElementById('sleepTimerBadge');
+    const offlineBadge = document.getElementById('offlineBadge');
+    const themeToggle = document.getElementById('themeToggle');
+    const viewToggleBtn = document.getElementById('viewToggleBtn');
+
+    /**
+     * RADIO BROWSER API SERVICE
+     */
+    class RadioAPI {
+      static async fetchIndiaStations() {
+        const CACHE_KEY = 'tarang_stations_cache_v2';
+        const CACHE_TIME_KEY = 'tarang_cache_time_v2';
+        const CACHE_TTL = 12 * 60 * 60 * 1000;
+
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+
+        if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime)) < CACHE_TTL) {
+          const parsed = JSON.parse(cachedData);
+          return parsed.filter(s => !isBlacklisted(s.name));
+        }
+
+        const servers = [
+          'https://de1.api.radio-browser.info',
+          'https://at1.api.radio-browser.info',
+          'https://nl1.api.radio-browser.info'
+        ];
+
+        for (const server of servers) {
+          try {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), 6000);
+            
+            const response = await fetch(`${server}/json/stations/bycountrycodeexact/IN?limit=180&order=votes&reverse=true`, {
+              signal: controller.signal
+            });
+            clearTimeout(id);
+
+            if (response.ok) {
+              const data = await response.json();
+              const validStations = data.filter(s => (s.url_resolved || s.url) && !isBlacklisted(s.name));
+              localStorage.setItem(CACHE_KEY, JSON.stringify(validStations));
+              localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+              return validStations;
+            }
+          } catch (err) {
+            console.warn(`Failed to fetch from ${server}, trying next mirror...`, err);
+          }
+        }
+
+        return cachedData ? JSON.parse(cachedData).filter(s => !isBlacklisted(s.name)) : FALLBACK_STATIONS;
+      }
+    }
+
+    /**
+     * INITIALIZATION
+     */
+    async function initApp() {
+      setupTheme();
+      setupEventListeners();
+      setupNetworkListeners();
+
+      try {
+        const apiStations = await RadioAPI.fetchIndiaStations();
+        const combined = [...FALLBACK_STATIONS];
+        apiStations.forEach(st => {
+          if (!combined.some(s => s.stationuuid === st.stationuuid || s.name === st.name) && !isBlacklisted(st.name)) {
+            combined.push(st);
+          }
+        });
+        state.stations = combined;
+      } catch (e) {
+        state.stations = FALLBACK_STATIONS;
+      }
+
+      filterAndRenderStations();
+      renderFavorites();
+      renderHistory();
+      initEqualizer();
+    }
+
+    /**
+     * THEME MANAGEMENT
+     */
+    function setupTheme() {
+      document.body.setAttribute('data-theme', state.theme);
+      updateThemeIcons();
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('tarang_theme', state.theme);
+      setupTheme();
+    }
+
+    function updateThemeIcons() {
+      const sun = themeToggle.querySelector('.sun-icon');
+      const moon = themeToggle.querySelector('.moon-icon');
+      if (state.theme === 'light') {
+        sun.classList.remove('hidden');
+        moon.classList.add('hidden');
+      } else {
+        sun.classList.add('hidden');
+        moon.classList.remove('hidden');
+      }
+    }
+
+    /**
+     * NETWORK DETECTION
+     */
+    function setupNetworkListeners() {
+      const updateOnlineStatus = () => {
+        if (navigator.onLine) {
+          offlineBadge.classList.add('hidden');
+        } else {
+          offlineBadge.classList.remove('hidden');
+          setPlayerStatus('You are offline');
+        }
+      };
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+      updateOnlineStatus();
+    }
+
+    /**
+     * FILTERING & SEARCH
+     */
+    function filterAndRenderStations() {
+      let result = state.stations.filter(s => !isBlacklisted(s.name));
+
+      // Search Query
+      if (state.searchQuery.trim()) {
+        const q = state.searchQuery.toLowerCase();
+        result = result.filter(s => 
+          s.name.toLowerCase().includes(q) ||
+          (s.state && s.state.toLowerCase().includes(q)) ||
+          (s.tags && s.tags.toLowerCase().includes(q)) ||
+          (s.language && s.language.toLowerCase().includes(q))
+        );
+      }
+
+      // Category Chip
+      if (state.activeCategory !== 'all') {
+        const cat = state.activeCategory;
+        result = result.filter(s => {
+          const tags = (s.tags || '').toLowerCase();
+          const name = s.name.toLowerCase();
+          if (cat === 'news') return tags.includes('news') || tags.includes('talk');
+          if (cat === 'devotional') return tags.includes('devotional') || tags.includes('bhajan') || tags.includes('gurbani');
+          if (cat === 'music') return tags.includes('fm') || tags.includes('music') || tags.includes('hits') || tags.includes('bollywood');
+          return true;
+        });
+      }
+
+      // Language Select
+      if (state.selectedLanguage !== 'all') {
+        result = result.filter(s => 
+          (s.language && s.language.toLowerCase().includes(state.selectedLanguage)) ||
+          (s.tags && s.tags.toLowerCase().includes(state.selectedLanguage))
+        );
+      }
+
+      // State Select
+      if (state.selectedState !== 'all') {
+        result = result.filter(s => {
+          const st = (s.state || '').toLowerCase();
+          const tags = (s.tags || '').toLowerCase();
+          const name = s.name.toLowerCase();
+          const target = state.selectedState.toLowerCase();
+          return st.includes(target) || tags.includes(target) || name.includes(target);
+        });
+      }
+
+      state.filteredStations = result;
+      renderStationGrid(stationsContainer, state.filteredStations);
+    }
+
+    /**
+     * RENDER STATION CARDS (Supports universal fallback square artwork)
+     */
+    function renderStationGrid(container, stations) {
+      if (!stations || stations.length === 0) {
+        container.innerHTML = `
+          <p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 40px 0;">
+            No stations found.
+          </p>`;
+        return;
+      }
+
+      container.innerHTML = stations.map(station => {
+        const isFav = state.favorites.some(f => f.stationuuid === station.stationuuid);
+        const isPlayingThis = state.currentStation && state.currentStation.stationuuid === station.stationuuid;
+        const bitrate = station.bitrate ? `${station.bitrate} kbps` : 'AAC';
+        const imgSrc = station.favicon && station.favicon.trim() !== '' ? station.favicon : FALLBACK_IMAGE;
+
+        return `
+          <div class="station-card ${isPlayingThis ? 'playing' : ''} ${station.isDead ? 'card-unavailable' : ''}" 
+               data-id="${station.stationuuid}">
+            <div class="card-top">
+              <img class="station-icon" src="${imgSrc}" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';" alt="${escapeHTML(station.name)}">
+              <button class="fav-btn ${isFav ? 'active' : ''}" data-fav="${station.stationuuid}" title="Bookmark Station">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+              </button>
+            </div>
+            <div class="station-name">${escapeHTML(station.name)}</div>
+            <div class="station-meta">${escapeHTML(station.state || station.language || 'India')}</div>
+            <div class="card-tags">
+              <span class="tag-badge bitrate">${bitrate}</span>
+              ${station.language ? `<span class="tag-badge">${escapeHTML(station.language)}</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * AUDIO PLAYER CONTROL
+     */
+    function playStation(station) {
+      if (!station || station.isDead) return;
+
+      if (state.retryTimer) clearTimeout(state.retryTimer);
+
+      state.currentStation = station;
+      state.retryCount = 0;
+      state.isReconnecting = false;
+
+      addToHistory(station);
+
+      const streamUrl = station.url_resolved || station.url;
+      audio.src = streamUrl;
+      audio.load();
+
+      setPlayerStatus('Buffering...');
+      state.isBuffering = true;
+      updateUIState();
+
+      audio.play().then(() => {
+        state.isPlaying = true;
+        state.isBuffering = false;
+        setPlayerStatus('Playing Live');
+        updateUIState();
+        updateMediaSession(station);
+      }).catch(err => {
+        console.error('Playback initiation error:', err);
+        handlePlaybackFailure();
+      });
+
+      miniPlayer.classList.remove('hidden');
+      filterAndRenderStations();
+    }
+
+    function togglePlayPause() {
+      if (!state.currentStation) return;
+
+      if (state.isPlaying) {
+        audio.pause();
+        state.isPlaying = false;
+        setPlayerStatus('Paused');
+      } else {
+        setPlayerStatus('Buffering...');
+        state.isBuffering = true;
+        updateUIState();
+        audio.play().then(() => {
+          state.isPlaying = true;
+          state.isBuffering = false;
+          setPlayerStatus('Playing Live');
+        }).catch(() => handlePlaybackFailure());
+      }
+      updateUIState();
+    }
+
+    function handlePlaybackFailure() {
+      state.isPlaying = false;
+      state.isBuffering = false;
+
+      if (state.retryCount < state.maxRetries) {
+        state.retryCount++;
+        state.isReconnecting = true;
+        const delay = Math.pow(2, state.retryCount) * 1000;
+        setPlayerStatus(`Reconnecting (${state.retryCount}/${state.maxRetries})...`);
+        updateUIState();
+
+        state.retryTimer = setTimeout(() => {
+          if (state.currentStation) {
+            audio.load();
+            audio.play().then(() => {
+              state.isPlaying = true;
+              state.isReconnecting = false;
+              state.retryCount = 0;
+              setPlayerStatus('Playing Live');
+              updateUIState();
+            }).catch(() => handlePlaybackFailure());
+          }
+        }, delay);
+      } else {
+        state.isReconnecting = false;
+        if (state.currentStation) {
+          state.currentStation.isDead = true;
+        }
+        setPlayerStatus('Station Unavailable');
+        updateUIState();
+        filterAndRenderStations();
+      }
+    }
+
+    function playNextStation() {
+      if (!state.currentStation || state.filteredStations.length === 0) return;
+      const idx = state.filteredStations.findIndex(s => s.stationuuid === state.currentStation.stationuuid);
+      const nextIdx = (idx + 1) % state.filteredStations.length;
+      playStation(state.filteredStations[nextIdx]);
+    }
+
+    function playPrevStation() {
+      if (!state.currentStation || state.filteredStations.length === 0) return;
+      const idx = state.filteredStations.findIndex(s => s.stationuuid === state.currentStation.stationuuid);
+      const prevIdx = (idx - 1 + state.filteredStations.length) % state.filteredStations.length;
+      playStation(state.filteredStations[prevIdx]);
+    }
+
+    function setPlayerStatus(text) {
+      miniStatus.innerHTML = state.isBuffering || state.isReconnecting ? 
+        `<div class="spinner"></div> <span>${text}</span>` : `<span>${text}</span>`;
+    }
+
+    function updateUIState() {
+      const playIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+      const pauseIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+      const npPlayIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+      const npPauseIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+
+      if (state.isPlaying) {
+        miniPlayBtn.innerHTML = pauseIcon;
+        npPlayBtn.innerHTML = npPauseIcon;
+      } else {
+        miniPlayBtn.innerHTML = playIcon;
+        npPlayBtn.innerHTML = npPlayIcon;
+      }
+
+      if (state.currentStation) {
+        const name = state.currentStation.name;
+        const sub = `${state.currentStation.state || ''} ${state.currentStation.language ? '• ' + state.currentStation.language : ''}`;
+        const artworkUrl = state.currentStation.favicon && state.currentStation.favicon.trim() !== '' ? state.currentStation.favicon : FALLBACK_IMAGE;
+
+        miniTitle.textContent = name;
+        npTitle.textContent = name;
+        npSub.textContent = sub || 'Live Stream';
+        
+        npBitrate.textContent = state.currentStation.bitrate ? `${state.currentStation.bitrate} kbps` : 'Live';
+        npFormat.textContent = (state.currentStation.codec || 'MP3').toUpperCase();
+
+        miniThumb.innerHTML = `<img src="${artworkUrl}" onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';" style="width:100%;height:100%;object-fit:cover;">`;
+        npArtworkImg.src = artworkUrl;
+        npArtworkImg.onerror = function() { this.src = FALLBACK_IMAGE; };
+
+        // Bookmark button color state in Now Playing
+        const isFav = state.favorites.some(f => f.stationuuid === state.currentStation.stationuuid);
+        const npFavBtn = document.getElementById('npFavBtn');
+        npFavBtn.style.color = isFav ? 'var(--danger)' : 'var(--text-primary)';
+        npFavBtn.querySelector('svg').setAttribute('fill', isFav ? 'currentColor' : 'none');
+      }
+    }
+
+    /**
+     * MEDIA SESSION API
+     */
+    function updateMediaSession(station) {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: station.name,
+          artist: station.state || station.language || 'Live Radio India',
+          album: 'Tarang FM',
+          artwork: [
+            { src: station.favicon || FALLBACK_IMAGE, sizes: '512x512', type: 'image/png' }
+          ]
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => togglePlayPause());
+        navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
+        navigator.mediaSession.setActionHandler('previoustrack', () => playPrevStation());
+        navigator.mediaSession.setActionHandler('nexttrack', () => playNextStation());
+      }
+    }
+
+    /**
+     * SLEEP TIMER MANAGEMENT
+     */
+    function setSleepTimer(minutes) {
+      if (state.sleepTimeout) clearTimeout(state.sleepTimeout);
+      if (state.sleepInterval) clearInterval(state.sleepInterval);
+
+      if (minutes === 0) {
+        state.sleepEndTime = null;
+        sleepTimerBadge.classList.add('hidden');
+        return;
+      }
+
+      state.sleepEndTime = Date.now() + (minutes * 60 * 1000);
+      sleepTimerBadge.classList.remove('hidden');
+      updateSleepBadgeText();
+
+      state.sleepInterval = setInterval(updateSleepBadgeText, 10000);
+
+      state.sleepTimeout = setTimeout(() => {
+        if (state.isPlaying) {
+          audio.pause();
+          state.isPlaying = false;
+          setPlayerStatus('Sleep Timer Ended');
+          updateUIState();
+        }
+        setSleepTimer(0);
+      }, minutes * 60 * 1000);
+    }
+
+    function updateSleepBadgeText() {
+      if (!state.sleepEndTime) return;
+      const diff = Math.max(0, Math.ceil((state.sleepEndTime - Date.now()) / 60000));
+      if (diff > 0) {
+        sleepTimerBadge.textContent = `${diff}m`;
+      } else {
+        sleepTimerBadge.classList.add('hidden');
+      }
+    }
+
+    /**
+     * FAVORITES & HISTORY MANAGEMENT (Updated to keep recent tab heart color synced!)
+     */
+    function toggleFavorite(station) {
+      const idx = state.favorites.findIndex(f => f.stationuuid === station.stationuuid);
+      if (idx >= 0) {
+        state.favorites.splice(idx, 1);
+      } else {
+        state.favorites.push(station);
+      }
+      localStorage.setItem('tarang_favs', JSON.stringify(state.favorites));
+      filterAndRenderStations();
+      renderFavorites();
+      renderHistory(); // Synchronize Recent view UI
+      updateUIState();
+    }
+
+    function renderFavorites() {
+      renderStationGrid(favoritesContainer, state.favorites);
+    }
+
+    function addToHistory(station) {
+      state.history = state.history.filter(h => h.stationuuid !== station.stationuuid);
+      state.history.unshift(station);
+      if (state.history.length > 15) state.history.pop();
+      localStorage.setItem('tarang_history', JSON.stringify(state.history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      renderStationGrid(historyContainer, state.history);
+    }
+
+    /**
+     * ANIMATED EQUALIZER CANVAS VISUALIZER
+     */
+    function initEqualizer() {
+      const canvas = document.getElementById('eqCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const numBars = 32;
+      let phase = 0;
+
+      function draw() {
+        requestAnimationFrame(draw);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const barWidth = (canvas.width / numBars) - 3;
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#f97316';
+
+        for (let i = 0; i < numBars; i++) {
+          let height = 4;
+          if (state.isPlaying) {
+            height = Math.sin(phase + i * 0.25) * 20 + Math.cos(phase * 0.8 + i * 0.1) * 15 + 25;
+            height = Math.max(4, Math.min(canvas.height, height));
+          }
+
+          const x = i * (barWidth + 3);
+          const y = canvas.height - height;
+
+          ctx.fillStyle = accentColor;
+          ctx.beginPath();
+          ctx.roundRect(x, y, barWidth, height, 3);
+          ctx.fill();
+        }
+
+        if (state.isPlaying) {
+          phase += 0.08;
+        }
+      }
+      draw();
+    }
+
+    /**
+     * EVENT LISTENERS
+     */
+    function setupEventListeners() {
+      audio.addEventListener('waiting', () => {
+        state.isBuffering = true;
+        setPlayerStatus('Buffering...');
+      });
+      audio.addEventListener('playing', () => {
+        state.isBuffering = false;
+        state.isPlaying = true;
+        setPlayerStatus('Playing Live');
+        updateUIState();
+      });
+      audio.addEventListener('error', () => {
+        handlePlaybackFailure();
+      });
+
+      let debounceTimer;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          state.searchQuery = e.target.value;
+          filterAndRenderStations();
+        }, 250);
+      });
+
+      categoryChips.addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        categoryChips.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        state.activeCategory = chip.dataset.cat;
+        filterAndRenderStations();
+      });
+
+      languageSelect.addEventListener('change', (e) => {
+        state.selectedLanguage = e.target.value;
+        filterAndRenderStations();
+      });
+      stateSelect.addEventListener('change', (e) => {
+        state.selectedState = e.target.value;
+        filterAndRenderStations();
+      });
+
+      viewToggleBtn.addEventListener('click', () => {
+        state.viewMode = state.viewMode === 'grid' ? 'list' : 'grid';
+        if (state.viewMode === 'list') {
+          stationsContainer.classList.remove('stations-grid');
+          stationsContainer.classList.add('stations-list');
+        } else {
+          stationsContainer.classList.remove('stations-list');
+          stationsContainer.classList.add('stations-grid');
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        const favBtn = e.target.closest('.fav-btn');
+        if (favBtn) {
+          e.stopPropagation();
+          const uuid = favBtn.dataset.fav;
+          const station = state.stations.find(s => s.stationuuid === uuid) || 
+                          state.favorites.find(s => s.stationuuid === uuid) ||
+                          state.history.find(s => s.stationuuid === uuid);
+          if (station) toggleFavorite(station);
+          return;
+        }
+
+        const card = e.target.closest('.station-card');
+        if (card) {
+          const uuid = card.dataset.id;
+          const station = state.stations.find(s => s.stationuuid === uuid) || 
+                          state.favorites.find(s => s.stationuuid === uuid) ||
+                          state.history.find(s => s.stationuuid === uuid);
+          if (station) playStation(station);
+        }
+      });
+
+      miniPlayBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePlayPause();
+      });
+      npPlayBtn.addEventListener('click', togglePlayPause);
+      document.getElementById('prevBtn').addEventListener('click', playPrevStation);
+      document.getElementById('nextBtn').addEventListener('click', playNextStation);
+
+      document.getElementById('miniPlayerClickArea').addEventListener('click', () => {
+        nowPlayingScreen.classList.add('open');
+      });
+      document.getElementById('closeNpBtn').addEventListener('click', () => {
+        nowPlayingScreen.classList.remove('open');
+      });
+
+      document.getElementById('npFavBtn').addEventListener('click', () => {
+        if (state.currentStation) toggleFavorite(state.currentStation);
+      });
+
+      volumeSlider.addEventListener('input', (e) => {
+        audio.volume = parseFloat(e.target.value);
+      });
+      muteBtn.addEventListener('click', () => {
+        audio.muted = !audio.muted;
+        muteBtn.style.opacity = audio.muted ? '0.4' : '1';
+      });
+
+      sleepTimerBtn.addEventListener('click', () => {
+        sleepModal.classList.add('open');
+      });
+      sleepModal.addEventListener('click', (e) => {
+        if (e.target === sleepModal) sleepModal.classList.remove('open');
+        const opt = e.target.closest('.timer-option');
+        if (opt) {
+          const mins = parseInt(opt.dataset.minutes);
+          setSleepTimer(mins);
+          sleepModal.classList.remove('open');
+        }
+      });
+
+      document.getElementById('shareBtn').addEventListener('click', () => {
+        if (state.currentStation && navigator.share) {
+          navigator.share({
+            title: `Listening to ${state.currentStation.name}`,
+            text: `Tune into ${state.currentStation.name} live on Tarang Radio!`,
+            url: window.location.href
+          }).catch(() => {});
+        } else {
+          alert(`Sharing station: ${state.currentStation?.name || 'Tarang FM'}`);
+        }
+      });
+
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+          
+          btn.classList.add('active');
+          const target = btn.dataset.target;
+          document.getElementById(target).classList.add('active');
+        });
+      });
+
+      themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
